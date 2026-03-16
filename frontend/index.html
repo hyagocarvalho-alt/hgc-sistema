@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HGC</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f7f4;
+      color: #1e2d26;
+    }
+
+    /* ── TOPO ── */
+    .topo {
+      background: #1a6b4a;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topo h1 { font-size: 1.4rem; }
+    .topo span { font-size: .9rem; opacity: .8; }
+    .btn-sair {
+      background: rgba(255,255,255,.2);
+      border: none; color: white;
+      padding: .4rem 1rem; border-radius: 6px;
+      cursor: pointer; font-size: .85rem;
+    }
+
+    /* ── ABAS ── */
+    .abas {
+      display: flex;
+      background: white;
+      border-bottom: 2px solid #e0ede7;
+    }
+    .aba {
+      padding: .85rem 1.5rem;
+      cursor: pointer;
+      font-size: .92rem;
+      color: #4a6357;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all .2s;
+    }
+    .aba.ativa {
+      color: #1a6b4a;
+      border-bottom-color: #1a6b4a;
+      font-weight: 600;
+    }
+
+    /* ── CONTEÚDO ── */
+    .pagina { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+
+    /* ── CARD ── */
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+      margin-bottom: 1.5rem;
+    }
+    .card h2 {
+      font-size: 1.15rem;
+      color: #1a6b4a;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── FORMULÁRIO ── */
+    .campo { margin-bottom: 1rem; }
+    .campo label {
+      display: block;
+      font-size: .82rem;
+      font-weight: 600;
+      color: #4a6357;
+      margin-bottom: .35rem;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+    .campo input, .campo select, .campo textarea {
+      width: 100%;
+      padding: .65rem .9rem;
+      border: 1.5px solid #d4e6da;
+      border-radius: 8px;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .campo input:focus, .campo select:focus {
+      border-color: #1a6b4a;
+    }
+    .linha { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* ── BOTÕES ── */
+    .btn {
+      padding: .7rem 1.5rem;
+      border: none; border-radius: 8px;
+      font-size: .95rem; font-weight: 500;
+      cursor: pointer; transition: all .2s;
+    }
+    .btn-verde { background: #1a6b4a; color: white; width: 100%; padding: .8rem; }
+    .btn-verde:hover { background: #2d9467; }
+    .btn-verde:disabled { opacity: .6; cursor: not-allowed; }
+    .btn-pequeno { padding: .4rem .9rem; font-size: .82rem; }
+    .btn-cancelar { background: #fef2f2; color: #dc2626; }
+    .btn-confirmar { background: #e8f5ee; color: #1a6b4a; }
+
+    /* ── HORÁRIOS ── */
+    .horarios {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .5rem;
+      margin-top: .5rem;
+    }
+    .horario {
+      padding: .5rem;
+      text-align: center;
+      border: 1.5px solid #d4e6da;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: .85rem;
+      transition: all .2s;
+    }
+    .horario:hover { border-color: #1a6b4a; color: #1a6b4a; }
+    .horario.selecionado { background: #1a6b4a; color: white; border-color: #1a6b4a; }
+    .horario.ocupado { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; text-decoration: line-through; }
+
+    /* ── ALERTA CLIMA ── */
+    .alerta-chuva {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: .85rem 1rem;
+      margin-top: .75rem;
+      font-size: .88rem;
+      color: #1d4ed8;
+    }
+    .alerta-sol {
+      background: #e8f5ee;
+      border: 1px solid #b8deca;
+      border-radius: 8px;
+      padding: .85rem 1rem;
+      margin-top: .75rem;
+      font-size: .88rem;
+      color: #1a6b4a;
+    }
+
+    /* ── LISTA AGENDAMENTOS ── */
+    .agendamento-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      border: 1px solid #e0ede7;
+      border-radius: 10px;
+      margin-bottom: .75rem;
+    }
+    .ag-data {
+      width: 52px; height: 56px;
+      background: #e8f5ee;
+      border-radius: 8px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .ag-dia { font-size: 1.4rem; font-weight: 700; color: #1a6b4a; line-height: 1; }
+    .ag-mes { font-size: .65rem; color: #2d9467; text-transform: uppercase; }
+    .ag-info { flex: 1; padding: 0 1rem; }
+    .ag-medico { font-weight: 600; font-size: .95rem; }
+    .ag-espec { font-size: .82rem; color: #7a9588; margin-top: 2px; }
+    .ag-horario { font-size: .8rem; color: #4a6357; margin-top: 4px; }
+    .status {
+      font-size: .75rem; font-weight: 600;
+      padding: 3px 10px; border-radius: 99px;
+    }
+    .status-agendado  { background: #eff6ff; color: #2563eb; }
+    .status-confirmado { background: #e8f5ee; color: #1a6b4a; }
+    .status-realizado  { background: #f1f5f9; color: #64748b; }
+    .status-cancelado  { background: #fef2f2; color: #dc2626; }
+
+    /* ── MENSAGENS ── */
+    .erro   { background: #fef2f2; color: #dc2626; padding: .75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: .9rem; }
+    .sucesso { background: #e8f5ee; color: #1a6b4a; padding: .75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: .9rem; }
+
+    /* ── CEP ── */
+    .cep-linha { display: grid; grid-template-columns: 1fr auto; gap: .75rem; align-items: flex-end; }
+    .btn-cep { height: 40px; background: #e8f5ee; color: #1a6b4a; border: 1.5px solid #b8deca; border-radius: 8px; padding: 0 1rem; cursor: pointer; font-size: .88rem; white-space: nowrap; }
+
+    .vazio { text-align: center; padding: 3rem; color: #94a3b8; }
+    .vazio-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── TELA DE LOGIN ── -->
+  <div v-if="!usuario" style="min-height:100vh;display:flex;align-items:center;justify-content:center">
+    <div style="width:100%;max-width:400px;padding:1rem">
+
+      <div style="text-align:center;margin-bottom:2rem">
+        <div style="font-size:2.5rem">🏥</div>
+        <h1 style="color:#1a6b4a;font-size:1.75rem;margin-top:.5rem">HGC</h1>
+        <p style="color:#7a9588;margin-top:.35rem">Sistema de Agendamentos</p>
+      </div>
+
+      <!-- Abas login/cadastro -->
+      <div style="display:flex;background:#e8f5ee;border-radius:10px;padding:4px;margin-bottom:1.5rem">
+        <button @click="abaAuth='login'"
+          :style="abaAuth==='login' ? 'flex:1;padding:.6rem;border:none;background:white;border-radius:8px;font-weight:600;color:#1a6b4a;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.08)' : 'flex:1;padding:.6rem;border:none;background:none;color:#4a6357;cursor:pointer'">
+          Entrar
+        </button>
+        <button @click="abaAuth='cadastro'"
+          :style="abaAuth==='cadastro' ? 'flex:1;padding:.6rem;border:none;background:white;border-radius:8px;font-weight:600;color:#1a6b4a;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.08)' : 'flex:1;padding:.6rem;border:none;background:none;color:#4a6357;cursor:pointer'">
+          Cadastrar
+        </button>
+      </div>
+
+      <div class="card">
+        <div v-if="erro" class="erro">{{ erro }}</div>
+        <div v-if="sucesso" class="sucesso">{{ sucesso }}</div>
+
+        <!-- LOGIN -->
+        <div v-if="abaAuth==='login'">
+          <div class="campo"><label>Email</label><input v-model="loginForm.email" type="email" placeholder="seu@email.com" @keyup.enter="fazerLogin" /></div>
+          <div class="campo"><label>Senha</label><input v-model="loginForm.senha" type="password" placeholder="••••••" @keyup.enter="fazerLogin" /></div>
+          <button class="btn btn-verde" @click="fazerLogin" :disabled="carregando">
+            {{ carregando ? 'Entrando...' : 'Entrar' }}
+          </button>
+          <div style="text-align:center;margin-top:1rem;font-size:.82rem;color:#7a9588">
+            Teste: <b style="color:#1a6b4a">joao@email.com</b> / <b style="color:#1a6b4a">123456</b>
+          </div>
+        </div>
+
+        <!-- CADASTRO -->
+        <div v-if="abaAuth==='cadastro'">
+          <div class="campo"><label>Nome completo</label><input v-model="cadForm.nome" type="text" placeholder="João da Silva" /></div>
+          <div class="linha">
+            <div class="campo"><label>Email</label><input v-model="cadForm.email" type="email" placeholder="seu@email.com" /></div>
+            <div class="campo"><label>Telefone</label><input v-model="cadForm.telefone" type="tel" placeholder="(11) 99999-9999" /></div>
+          </div>
+          <div class="linha">
+            <div class="campo"><label>CPF</label><input v-model="cadForm.cpf" type="text" placeholder="000.000.000-00" /></div>
+            <div class="campo">
+              <label>Perfil</label>
+              <select v-model="cadForm.perfil">
+                <option value="paciente">Paciente</option>
+                <option value="secretario">Secretário(a)</option>
+              </select>
+            </div>
+          </div>
+          <div class="campo"><label>Senha</label><input v-model="cadForm.senha" type="password" placeholder="Mínimo 6 caracteres" /></div>
+          <button class="btn btn-verde" @click="fazerCadastro" :disabled="carregando">
+            {{ carregando ? 'Cadastrando...' : 'Criar conta' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TELA PRINCIPAL ── -->
+  <div v-else>
+    <div class="topo">
+      <h1>🏥 HGC</h1>
+      <span>Olá, {{ usuario.nome.split(' ')[0] }}!</span>
+      <button class="btn-sair" @click="sair">Sair</button>
+    </div>
+
+    <div class="abas">
+      <div class="aba" :class="{ativa: aba==='agendamentos'}" @click="aba='agendamentos'; carregarAgendamentos()">📋 Minhas Consultas</div>
+      <div class="aba" :class="{ativa: aba==='agendar'}" @click="aba='agendar'">➕ Nova Consulta</div>
+      <div class="aba" v-if="usuario.perfil !== 'paciente'" :class="{ativa: aba==='admin'}" @click="aba='admin'; carregarAgendamentos()">⚙️ Painel Admin</div>
+    </div>
+
+    <div class="pagina">
+      <div v-if="erro" class="erro">{{ erro }}</div>
+      <div v-if="sucesso" class="sucesso">{{ sucesso }}</div>
+
+      <!-- ── LISTA DE CONSULTAS ── -->
+      <div v-if="aba==='agendamentos'">
+        <div class="card">
+          <h2>Minhas Consultas</h2>
+          <div v-if="agendamentos.length === 0" class="vazio">
+            <div class="vazio-icon">📅</div>
+            <div>Nenhuma consulta agendada</div>
+          </div>
+          <div v-for="a in agendamentos" :key="a.id" class="agendamento-item">
+            <div class="ag-data">
+              <div class="ag-dia">{{ a.data.split('-')[2] }}</div>
+              <div class="ag-mes">{{ mesAbrev(a.data) }}</div>
+            </div>
+            <div class="ag-info">
+              <div class="ag-medico">{{ a.medico }}</div>
+              <div class="ag-espec">{{ a.especialidade }}</div>
+              <div class="ag-horario">🕐 {{ a.horario }}</div>
+              <div v-if="a.chuva" style="font-size:.78rem;color:#2563eb;margin-top:3px">🌧️ Previsão de chuva neste dia</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.5rem">
+              <span class="status" :class="'status-'+a.status">{{ a.status }}</span>
+              <button v-if="a.status !== 'cancelado' && a.status !== 'realizado'"
+                class="btn btn-pequeno btn-cancelar"
+                @click="cancelarConsulta(a.id)">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── NOVA CONSULTA ── -->
+      <div v-if="aba==='agendar'">
+        <div class="card">
+          <h2>Agendar Nova Consulta</h2>
+
+          <!-- CEP -->
+          <div class="campo">
+            <label>CEP (para buscar endereço)</label>
+            <div class="cep-linha">
+              <input v-model="agForm.cep" type="text" placeholder="00000-000" @input="mascararCep" />
+              <button class="btn-cep" @click="buscarCep" :disabled="cepCarregando">
+                {{ cepCarregando ? '...' : '🔍 Buscar' }}
+              </button>
+            </div>
+          </div>
+          <div v-if="endereco.rua" class="linha">
+            <div class="campo"><label>Rua</label><input :value="endereco.rua" disabled /></div>
+            <div class="campo"><label>Bairro</label><input :value="endereco.bairro" disabled /></div>
+          </div>
+          <div v-if="endereco.cidade" class="linha">
+            <div class="campo"><label>Cidade</label><input :value="endereco.cidade" disabled /></div>
+            <div class="campo"><label>Estado</label><input :value="endereco.estado" disabled /></div>
+          </div>
+
+          <hr style="border:none;border-top:1px solid #e0ede7;margin:1rem 0" />
+
+          <!-- Especialidade e Médico -->
+          <div class="linha">
+            <div class="campo">
+              <label>Especialidade</label>
+              <select v-model="agForm.especialidade" @change="agForm.medico=''">
+                <option value="">Selecione</option>
+                <option v-for="e in especialidades" :key="e">{{ e }}</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label>Médico</label>
+              <select v-model="agForm.medico" :disabled="!agForm.especialidade" @change="carregarHorarios">
+                <option value="">Selecione</option>
+                <option v-for="m in medicosPorEspec(agForm.especialidade)" :key="m">{{ m }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="campo">
+            <label>Data</label>
+            <input v-model="agForm.data" type="date" :min="hoje" @change="carregarHorarios" />
+          </div>
+
+          <!-- Horários -->
+          <div v-if="agForm.medico && agForm.data" class="campo">
+            <label>Horário disponível</label>
+            <div class="horarios">
+              <div v-for="h in todosHorarios" :key="h"
+                class="horario"
+                :class="{ selecionado: agForm.horario===h, ocupado: horariosOcupados.includes(h) }"
+                @click="!horariosOcupados.includes(h) && (agForm.horario=h)">
+                {{ h }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Alerta clima -->
+          <div v-if="clima" :class="clima.temChuva ? 'alerta-chuva' : 'alerta-sol'">
+            {{ clima.alerta }} {{ clima.temperatura }}°C — {{ clima.descricao }}
+          </div>
+
+          <div class="campo" style="margin-top:1rem">
+            <label>Observações (opcional)</label>
+            <textarea v-model="agForm.observacoes" rows="3" placeholder="Sintomas, informações relevantes..."></textarea>
+          </div>
+
+          <button class="btn btn-verde" @click="criarAgendamento" :disabled="!agForm.medico || !agForm.data || !agForm.horario || carregando">
+            {{ carregando ? 'Agendando...' : '✅ Confirmar Agendamento' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ── PAINEL ADMIN ── -->
+      <div v-if="aba==='admin' && usuario.perfil !== 'paciente'">
+        <div class="card">
+          <h2>⚙️ Todos os Agendamentos</h2>
+          <div v-if="agendamentos.length === 0" class="vazio">
+            <div class="vazio-icon">📋</div>
+            <div>Nenhum agendamento encontrado</div>
+          </div>
+          <div v-for="a in agendamentos" :key="a.id" class="agendamento-item">
+            <div class="ag-data">
+              <div class="ag-dia">{{ a.data.split('-')[2] }}</div>
+              <div class="ag-mes">{{ mesAbrev(a.data) }}</div>
+            </div>
+            <div class="ag-info">
+              <div class="ag-medico">{{ a.medico }}</div>
+              <div class="ag-espec">{{ a.especialidade }} — {{ a.paciente_nome }}</div>
+              <div class="ag-horario">🕐 {{ a.horario }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.5rem">
+              <span class="status" :class="'status-'+a.status">{{ a.status }}</span>
+              <div style="display:flex;gap:.4rem">
+                <button v-if="a.status==='agendado'" class="btn btn-pequeno btn-confirmar" @click="atualizarStatus(a.id,'confirmado')">Confirmar</button>
+                <button v-if="a.status==='confirmado'" class="btn btn-pequeno btn-confirmar" @click="atualizarStatus(a.id,'realizado')">Concluir</button>
+                <button v-if="a.status!=='cancelado'&&a.status!=='realizado'" class="btn btn-pequeno btn-cancelar" @click="atualizarStatus(a.id,'cancelado')">Cancelar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:5000/api';
+
+const { createApp, ref, reactive, computed, onMounted } = Vue;
+
+createApp({
+  setup() {
+    const usuario = ref(null);
+    const token = ref('');
+    const aba = ref('agendamentos');
+    const abaAuth = ref('login');
+    const erro = ref('');
+    const sucesso = ref('');
+    const carregando = ref(false);
+    const cepCarregando = ref(false);
+    const agendamentos = ref([]);
+    const horariosOcupados = ref([]);
+    const clima = ref(null);
+    const endereco = reactive({ rua:'', bairro:'', cidade:'', estado:'' });
+
+    const loginForm = reactive({ email:'', senha:'' });
+    const cadForm = reactive({ nome:'', email:'', senha:'', telefone:'', cpf:'', perfil:'paciente' });
+    const agForm = reactive({ especialidade:'', medico:'', data:'', horario:'', observacoes:'', cep:'' });
+
+    const hoje = new Date().toISOString().split('T')[0];
+
+    const especialidades = ['Cardiologia','Dermatologia','Ortopedia','Pediatria','Clínica Geral','Neurologia','Ginecologia'];
+    const medicos = {
+      'Cardiologia':  ['Dr. Carlos Mendes','Dra. Ana Figueiredo'],
+      'Dermatologia': ['Dra. Luiza Campos','Dr. Rafael Torres'],
+      'Ortopedia':    ['Dr. Marcos Vieira','Dra. Beatriz Lima'],
+      'Pediatria':    ['Dra. Sandra Rocha','Dr. Felipe Gomes'],
+      'Clínica Geral':['Dr. Eduardo Nunes','Dra. Patricia Alves'],
+      'Neurologia':   ['Dr. Antonio Braga'],
+      'Ginecologia':  ['Dra. Fernanda Costa','Dra. Juliana Melo'],
+    };
+    const todosHorarios = ['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30'];
+
+    function medicosPorEspec(e) { return medicos[e] || []; }
+
+    function limparMsg() { erro.value=''; sucesso.value=''; }
+
+    function msg(tipo, texto, tempo=4000) {
+      if (tipo==='erro') erro.value = texto;
+      else sucesso.value = texto;
+      setTimeout(limparMsg, tempo);
+    }
+
+    // ── AUTH ──────────────────────────────
+    async function fazerLogin() {
+      limparMsg();
+      carregando.value = true;
+      try {
+        const r = await fetch(`${API}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(loginForm)
+        });
+        const data = await r.json();
+        if (!r.ok) { msg('erro', data.erro); return; }
+        token.value = data.token;
+        usuario.value = data.usuario;
+        localStorage.setItem('cvita_token', data.token);
+        localStorage.setItem('cvita_usuario', JSON.stringify(data.usuario));
+        carregarAgendamentos();
+      } catch(e) {
+        msg('erro', 'Erro ao conectar ao servidor.');
+      } finally {
+        carregando.value = false;
+      }
+    }
+
+    async function fazerCadastro() {
+      limparMsg();
+      carregando.value = true;
+      try {
+        const r = await fetch(`${API}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cadForm)
+        });
+        const data = await r.json();
+        if (!r.ok) { msg('erro', data.erro); return; }
+        token.value = data.token;
+        usuario.value = data.usuario;
+        localStorage.setItem('cvita_token', data.token);
+        localStorage.setItem('cvita_usuario', JSON.stringify(data.usuario));
+        msg('sucesso', 'Conta criada com sucesso!');
+        aba.value = 'agendamentos';
+      } catch(e) {
+        msg('erro', 'Erro ao conectar ao servidor.');
+      } finally {
+        carregando.value = false;
+      }
+    }
+
+    function sair() {
+      usuario.value = null;
+      token.value = '';
+      localStorage.removeItem('cvita_token');
+      localStorage.removeItem('cvita_usuario');
+    }
+
+    // ── AGENDAMENTOS ──────────────────────
+    async function carregarAgendamentos() {
+      try {
+        const r = await fetch(`${API}/agendamentos`, {
+          headers: { Authorization: `Bearer ${token.value}` }
+        });
+        const data = await r.json();
+        agendamentos.value = data.agendamentos || [];
+      } catch(e) {
+        msg('erro', 'Erro ao carregar agendamentos.');
+      }
+    }
+
+    async function carregarHorarios() {
+      if (!agForm.medico || !agForm.data) return;
+      clima.value = null;
+      try {
+        const r = await fetch(`${API}/agendamentos/horarios?data=${agForm.data}&medico=${encodeURIComponent(agForm.medico)}`, {
+          headers: { Authorization: `Bearer ${token.value}` }
+        });
+        const data = await r.json();
+        horariosOcupados.value = data.ocupados || [];
+      } catch(e) {}
+
+      // Consulta clima
+      if (endereco.cidade) {
+        try {
+          const r = await fetch(`${API}/clima?cidade=${encodeURIComponent(endereco.cidade)}&data=${agForm.data}`, {
+            headers: { Authorization: `Bearer ${token.value}` }
+          });
+          if (r.ok) clima.value = await r.json();
+        } catch(e) {}
+      }
+    }
+
+    async function criarAgendamento() {
+      limparMsg();
+      carregando.value = true;
+      try {
+        const body = { ...agForm, cidade: endereco.cidade };
+        const r = await fetch(`${API}/agendamentos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token.value}` },
+          body: JSON.stringify(body)
+        });
+        const data = await r.json();
+        if (!r.ok) { msg('erro', data.erro); return; }
+        msg('sucesso', data.mensagem);
+        Object.assign(agForm, { especialidade:'', medico:'', data:'', horario:'', observacoes:'', cep:'' });
+        Object.assign(endereco, { rua:'', bairro:'', cidade:'', estado:'' });
+        clima.value = null;
+        aba.value = 'agendamentos';
+        carregarAgendamentos();
+      } catch(e) {
+        msg('erro', 'Erro ao agendar consulta.');
+      } finally {
+        carregando.value = false;
+      }
+    }
+
+    async function cancelarConsulta(id) {
+      if (!confirm('Deseja cancelar esta consulta?')) return;
+      await atualizarStatus(id, 'cancelado');
+    }
+
+    async function atualizarStatus(id, status) {
+      try {
+        const r = await fetch(`${API}/agendamentos/${id}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token.value}` },
+          body: JSON.stringify({ status })
+        });
+        if (r.ok) { msg('sucesso', 'Status atualizado!'); carregarAgendamentos(); }
+      } catch(e) {
+        msg('erro', 'Erro ao atualizar status.');
+      }
+    }
+
+    // ── CEP ───────────────────────────────
+    async function buscarCep() {
+      const cep = agForm.cep.replace(/\D/g,'');
+      if (cep.length !== 8) { msg('erro', 'CEP inválido.'); return; }
+      cepCarregando.value = true;
+      try {
+        const r = await fetch(`${API}/cep/${cep}`, {
+          headers: { Authorization: `Bearer ${token.value}` }
+        });
+        const data = await r.json();
+        if (!r.ok) { msg('erro', data.erro); return; }
+        Object.assign(endereco, data);
+        msg('sucesso', `Endereço encontrado: ${data.cidade}/${data.estado}`);
+      } catch(e) {
+        msg('erro', 'Erro ao buscar CEP.');
+      } finally {
+        cepCarregando.value = false;
+      }
+    }
+
+    function mascararCep(e) {
+      agForm.cep = e.target.value.replace(/\D/g,'').replace(/^(\d{5})(\d)/,'$1-$2').slice(0,9);
+    }
+
+    // ── HELPERS ───────────────────────────
+    function mesAbrev(data) {
+      const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+      return meses[parseInt(data.split('-')[1]) - 1];
+    }
+
+    onMounted(() => {
+      const t = localStorage.getItem('cvita_token');
+      const u = localStorage.getItem('cvita_usuario');
+      if (t && u) { token.value = t; usuario.value = JSON.parse(u); carregarAgendamentos(); }
+    });
+
+    return {
+      usuario, aba, abaAuth, erro, sucesso, carregando, cepCarregando,
+      loginForm, cadForm, agForm, agendamentos, horariosOcupados,
+      clima, endereco, hoje, especialidades, todosHorarios,
+      medicosPorEspec, fazerLogin, fazerCadastro, sair,
+      carregarAgendamentos, carregarHorarios, criarAgendamento,
+      cancelarConsulta, atualizarStatus, buscarCep, mascararCep, mesAbrev,
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
