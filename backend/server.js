@@ -5,25 +5,35 @@ const db = require('./database');
 const authRoutes = require('./routes/auth');
 const agendamentosRoutes = require('./routes/agendamentos');
 const cepRoutes = require('./routes/cep');
-const climaRoutes = require('./routes/clima');        // ← novo
+const climaRoutes = require('./routes/clima');
 const proteger = require('./middleware/auth');
 
 const app = express();
 
-app.use(cors());
+// ← Atualiza o CORS
+app.use(cors({
+  origin: [
+    'http://localhost:8080',
+    'http://localhost:5173',
+    'https://hgc-sistema.vercel.app',
+    /\.vercel\.app$/
+  ],
+  credentials: true
+}));
+
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/agendamentos', agendamentosRoutes);
 app.use('/api/cep', cepRoutes);
-app.use('/api/clima', climaRoutes);                  // ← novo
+app.use('/api/clima', climaRoutes);
 
 app.get('/api/perfil', proteger, (req, res) => {
   res.json({ mensagem: `Olá, ${req.usuario.nome}!`, usuario: req.usuario });
 });
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', mensagem: 'Servidor da ClínicaVita funcionando! 🏥' });
+  res.json({ status: 'ok', mensagem: 'Servidor da HGC funcionando! 🏥' });
 });
 
 const PORT = process.env.PORT || 5000;
