@@ -1,38 +1,109 @@
-# frontend
+# 🏥 HGC — Sistema de Agendamento de Consultas
 
-This template should help get you started developing with Vue 3 in Vite.
+Sistema web completo para gerenciamento de agendamentos médicos, desenvolvido com **Vue.js** (frontend) e **Node.js + Express** (backend).
 
-## Recommended IDE Setup
+---
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## 🌐 Como Acessar o Sistema
 
-## Recommended Browser Setup
+### No Computador ou Celular
+Abra o navegador e acesse:
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
+```
+https://hgc-sistema.vercel.app
 ```
 
-### Compile and Hot-Reload for Development
+> ⚠️ **Atenção:** Na primeira vez que acessar, o sistema pode demorar até **1 minuto** para responder. Isso acontece porque o servidor gratuito "dorme" quando fica inativo. Aguarde e tente novamente.
 
-```sh
+---
+
+## 🔑 Contas de Teste
+
+| Perfil | Email | Senha |
+|---|---|---|
+| Paciente | joao@email.com | 123456 |
+| Secretário | secretaria@hgc.com | 123456 |
+
+---
+
+## 📋 Funcionalidades
+
+- ✅ Cadastro e login seguro com **JWT**
+- ✅ Agendamento de consultas com verificação de horários disponíveis
+- ✅ Consulta automática de endereço pelo **CEP (ViaCEP)**
+- ✅ Alerta de chuva com **OpenWeatherMap**
+- ✅ Painel administrativo para secretários
+
+---
+
+## 🔗 Links
+
+| Recurso | URL |
+|---|---|
+| 🌐 Sistema (Frontend) | https://hgc-sistema.vercel.app |
+| ⚙️ API (Backend) | https://hgc-sistema.onrender.com/api/health |
+| 📁 Repositório | https://github.com/hyagocarvalho-alt/hgc-sistema |
+
+---
+
+## 🛠️ Tecnologias
+
+| Camada | Tecnologia |
+|---|---|
+| Frontend | Vue.js 3 + Vite + Vue Router |
+| Backend | Node.js + Express |
+| Banco de dados | SQLite (sqlite3) |
+| Autenticação | JWT + bcryptjs |
+| API de CEP | ViaCEP |
+| API de Clima | OpenWeatherMap |
+| Deploy Frontend | Vercel |
+| Deploy Backend | Render |
+
+---
+
+## 🚀 Como Rodar Localmente
+
+### Pré-requisitos
+- Node.js v18 ou superior
+
+### 1. Clonar o projeto
+```bash
+git clone https://github.com/hyagocarvalho-alt/hgc-sistema.git
+cd hgc-sistema
+```
+
+### 2. Configurar o Backend
+```bash
+cd backend
+npm install
+cp .env.example .env
+node server.js
+```
+
+### 3. Configurar o Frontend
+```bash
+cd frontend
+npm install
 npm run dev
 ```
 
-### Compile and Minify for Production
+### 4. Acessar localmente
+- Frontend: http://localhost:8080
+- Backend: http://localhost:5000
 
-```sh
-npm run build
-```
+---
+
+## 📡 Endpoints da API
+
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | /api/auth/register | Cadastro |
+| POST | /api/auth/login | Login |
+| GET | /api/agendamentos | Listar consultas |
+| POST | /api/agendamentos | Criar consulta |
+| PATCH | /api/agendamentos/:id/status | Atualizar status |
+| GET | /api/agendamentos/horarios | Horários disponíveis |
+| GET | /api/cep/:cep | Buscar endereço |
+| GET | /api/clima | Previsão do tempo |
+
+---
